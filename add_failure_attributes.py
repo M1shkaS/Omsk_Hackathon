@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 import pandas as pd
 import os
 
+# добавление атрибутов для предсказания
+
 os.chdir("D:/Хакатон/Hackathon/Dataset")
 
 new_file = 'predictions.csv'
