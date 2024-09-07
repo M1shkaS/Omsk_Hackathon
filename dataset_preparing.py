@@ -4,7 +4,7 @@ import os
 
 os.chdir("D:/Хакатон/Omsk_Hackathon/Dataset")
 
-new_file = 'test.csv'
+new_file = 'predictions_30days.csv'
 if os.path.isfile(new_file):
     os.remove(new_file)
     print(f"Файл '{new_file}' успешно удалён.")
@@ -28,10 +28,10 @@ def dataset_preparing(file_name, prediction_horizons):
         df[f'Failure_{horizon}days'] = False
 
         # Получаем имя файла с данными за i-й период
-        date_string = "2023-09-30"
+        date_string = "2023-12-31"
         # Преобразуем строку в объект даты
         date_object = datetime.strptime(date_string, "%Y-%m-%d")
-        next_data_path = f"data_Q4_2023/{(date_object + timedelta(days=horizon)).strftime('%Y-%m-%d')}.csv"
+        next_data_path = f"data_Q1_2024/{(date_object + timedelta(days=horizon)).strftime('%Y-%m-%d')}.csv"
         print("Обработка файла: " + next_data_path)
 
         # Если файл с данными за i-й период существует
@@ -45,8 +45,8 @@ def dataset_preparing(file_name, prediction_horizons):
         print(f"Дисков сломается за {horizon} дней: {count}")
     return df
 
-file_name = 'data_Q3_2023/2023-09-30.csv'
-prediction_horizons = [90]  # Неделя, месяц, 3 месяца
+file_name = 'data_Q4_2023/2023-12-31.csv'
+prediction_horizons = [30]  # Неделя, месяц, 3 месяца
 
 # Добавляем предсказания в DataFrame
 df = dataset_preparing(file_name, prediction_horizons)
