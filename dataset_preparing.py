@@ -46,7 +46,7 @@ def dataset_preparing(file_name, prediction_horizons):
     return df
 
 file_name = 'data_Q3_2023/2023-09-30.csv'
-prediction_horizons = [7, 30, 90]  # Неделя, месяц, 3 месяца
+prediction_horizons = [90]  # Неделя, месяц, 3 месяца
 
 # Добавляем предсказания в DataFrame
 df = dataset_preparing(file_name, prediction_horizons)
