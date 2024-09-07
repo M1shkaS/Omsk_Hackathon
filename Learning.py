@@ -12,8 +12,9 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from decimal import Decimal, ROUND_HALF_UP
+from joblib import dump
 
-light_grey = np.array([230/255, 230/255, 230/255, 1])
+light_grey = np.array([230 / 255, 230 / 255, 230 / 255, 1])
 light_grey_colormap = ListedColormap([light_grey])
 colors_below_500 = ['#C8E6C9']
 colors_above_500 = ['#FFCDD2']
@@ -48,19 +49,21 @@ results = []
 
 # Обучение моделей и оценка результатов
 for model in models:
-    for target_name in targets:
-        y_train_target = y_train[target_name]
-        y_test_target = y_test[target_name]
-        model.fit(X_train, y_train_target)
-        y_pred = model.predict(X_test)
+    model.fit(X_train, y_train)  # Обучаем модель сразу по всем таргетам
+    y_pred = model.predict(X_test)
 
-        accuracy = accuracy_score(y_test_target, y_pred) # Всего определено правильно
-        precision = precision_score(y_test_target, y_pred) # Сколько писем, определённых как фишинговые, действительно фишинговые
-        recall = recall_score(y_test_target, y_pred) # Какой процент фишинговых писем удалось обнаружить
-        f1 = f1_score(y_test_target, y_pred)
+    # Оцениваем модель по всем таргетам одновременно
+    for i, target_name in enumerate(targets):
+        y_test_target = y_test[target_name]
+        y_pred_target = y_pred[:, i]  # Извлекаем предсказания для текущего таргета
+
+        accuracy = accuracy_score(y_test_target, y_pred_target)
+        precision = precision_score(y_test_target, y_pred_target)
+        recall = recall_score(y_test_target, y_pred_target)
+        f1 = f1_score(y_test_target, y_pred_target)
 
         # График матрицы ошибок
-        cf_matrix = confusion_matrix(y_test_target, y_pred)
+        cf_matrix = confusion_matrix(y_test_target, y_pred_target)
         mask_above_1000 = cf_matrix > 1000
         mask_below_1000 = cf_matrix <= 1000
 
@@ -83,8 +86,8 @@ for model in models:
 
         # Добавляем текст на правой подобласти
         text = (
-            "Accuracy:  {0:>6}\n"
-            "Precision:  {1:>6}\n"
+            "Accuracy:  {0:>6}n"
+            "Precision:  {1:>6}n"
             "Recall:       {2:>6}"
         ).format(f'{Decimal(str(accuracy * 100)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}%',
                  f'{Decimal(str(precision * 100)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)}%',
@@ -98,6 +101,9 @@ for model in models:
         model_name = type(model).__name__
         tn, fp, fn, tp = cf_matrix.ravel()
         results.append((model_name, target_name, accuracy, precision, recall, f1, tn, fp, fn, tp))
+
+    # Сохранение модели в файл
+    dump(model, f'ExtractedFeatures/{type(model).__name__}_model.joblib')
 
     # Вывод результатов
     for model_name, target_name, accuracy, precision, recall, f1, tn, fp, fn, tp in results:
